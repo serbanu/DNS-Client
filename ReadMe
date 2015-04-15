@@ -1,0 +1,70 @@
+				Protocoale de comunicatie - Tema 4
+					Mardaloescu Serban - 334CA
+					
+1. Implementare
+---------------
+
+	Tema a fost implementat in totalitate in C.
+	Exista doua functii importante in tema:
+		->request_info
+		->print_info
+	In continuare voi prezenta ceea ce fac acestea.
+	
+	Cele doua functii se bazeaza pe functii mai mici
+documentate in codul sursa. Sunt functii care
+transforma un nume de domeniu in formatul cerut de
+protocolul DNS, care transforma formatul cerut de
+catre DNS in nume uzual, functii care parseaza
+diverse resource records, care seteaza headerul si
+partea intrebarii dintr-un mesaj, s.a.
+	Protocolul implementat respecta specificatiile
+din cele doua RFC-uri. Partile  mesajului sunt puse
+pe rand  intr-un  buffer de  caractere, implicand
+lipsa paddingului  (cauzat  de structuri  sau de
+campurile variabile). Mai intai  este  configurat
+headerul conform  sectiunii 4.4.1 din RFC 1035, 
+dupa care  se trece la partea  intrebarii.  Coform
+sectiunii 4.1.2  din  acelasi RFC  se  salveaza 
+numele domeniului  in  formatul corespunzator, se
+seteaza  tipul primit in linia de  comanda, iar apoi
+clasa este setata ca fiind IN.
+	Dupa trimiterea mesajului, se afiseaza in fisierul
+`message.log` mesajul transmis sub forma hexazecimala.	
+	
+	La primirea  raspunsului, se scot  din header
+numarul de RR,  iar din campul question se scoate
+numele  domeniului (ar trebui sa fie acelasi cu cel
+trimis). Apoi se  parcurg toate  RR, pentru fiecare
+in parte apelandu-se  procedura  ce   stie  sa  o 
+parseze  si   sa  o  afiseze corespunzator.
+
+	Adresele  serverelor  de  DNS sunt  obtinute  din 
+fisierul `dns_servers.conf' astfel: se incearca prima
+adresa, daca este valida si  se primeste rezultatul
+in  mai putin  de  2  secunde, atunci se parseaza 
+rezultatul si  se  afiseaza; altfel  se incearca
+urmatoarea adresa. Daca nu  mai exista  adrese in
+fisier, atunci  programul se inchide.  Functia care 
+da adresa  unui nou  server  de nume,  `get_new_dns_sever`,
+va intoarce  1 in caz  de eroare, si 0  in rest.  Daca
+se termina fisierul, functia intoarce  1, dar la urmatorul
+apel ea  va incerca sa redeschida fisierul si  sa citeasca
+din nou adrese  de servere.
+
+	Pentru timeout  s-a folosit apelul  select, setat doar cu
+socketul pe care se asteapta datagrame.  Timeoutul a fost
+setat la 2 secunde.
+
+**Mentiune**: cand afisez mesajul trimis in fisierul corespunzator,
+al patrulea element imi este afisat diferit(FFFFFF80 in loc de 00).
+Am incercat sa repar acest lucru, insa nu am reusit sa identific
+problema. Restul mesajului este afisat corect in formatul
+corespunzator.
+
+2. Bibliografie
+---------------
+
+A. Tanenbaum, Retele de calculatoare - cap. 7 Nivelul Aplicatie - DNS
+Lab. 6 - Socketi UDP
+RFC 1034
+RFC 1035
